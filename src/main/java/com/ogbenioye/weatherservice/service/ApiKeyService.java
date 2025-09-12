@@ -22,7 +22,6 @@ public class ApiKeyService {
         this.userRepository = userRepository;
     }
 
-    //Generate new key
     public ApiResponse<ApiKey> generateNewKey(String ownerId) {
         var user = userRepository.findById(ownerId);
         if (user.isEmpty()) {
@@ -55,7 +54,6 @@ public class ApiKeyService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    //invalidate key +
     public ApiResponse<Boolean> invalidateApikey(String apiKey) {
         var response = apikeyRepo.findByApiKey(apiKey);
         if (response.isEmpty()) {
@@ -79,7 +77,6 @@ public class ApiKeyService {
         );
     };
 
-    //delete key +
     public ApiResponse<Boolean> deleteKey(String apiKey) {
         var response = apikeyRepo.findByApiKey(apiKey);
         if (response.isEmpty()) {

@@ -102,7 +102,6 @@ public class ApiKeyService {
         );
     }
 
-    //get key +
     public ApiResponse<ApiKey> getApiKey(String apiKey) {
         var response = apikeyRepo.findByApiKey(apiKey);
         if (response.isEmpty()) {
@@ -122,7 +121,6 @@ public class ApiKeyService {
         );
     }
 
-    //get keys by owner +-
     public ApiResponse<List<ApiKey>> getUserApikeys(String ownerId) {
         var owner  = userRepository.findById(ownerId);
         if (owner.isEmpty()) {
@@ -141,5 +139,9 @@ public class ApiKeyService {
                 HttpStatus.OK,
                 keys.get()
         );
+    }
+
+    public Boolean isValid(String apiKey) {
+        return apikeyRepo.findByApiKey(apiKey).stream().anyMatch(ApiKey::isActive);
     }
 }

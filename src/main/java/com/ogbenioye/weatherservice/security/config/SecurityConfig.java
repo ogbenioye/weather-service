@@ -1,22 +1,23 @@
 package com.ogbenioye.weatherservice.security.config;
 
+import com.ogbenioye.weatherservice.security.ApiKeyFilter;
 import com.ogbenioye.weatherservice.service.ApplicationUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-//    private final ApplicationUserService userService;
-
     public SecurityConfig() {
-//        userService = applicationUserService;
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -24,12 +25,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
+    public SecurityFilterChain filterChain(HttpSecurity http, ApiKeyFilter apiKeyFilter) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/account/**").permitAll()
-                .requestMatchers("").authenticated()
+                .requestMatchers("/key/**").authenticated()
                 .anyRequest().permitAll()
         ).formLogin(form -> form.disable());
+
+        http.addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

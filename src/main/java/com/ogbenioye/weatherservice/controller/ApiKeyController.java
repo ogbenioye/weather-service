@@ -1,10 +1,9 @@
 package com.ogbenioye.weatherservice.controller;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "api/v1/account")
-public class AccountController {
+@RequestMapping(path = "/api/v1/key")
+public class ApiKeyController {
 }

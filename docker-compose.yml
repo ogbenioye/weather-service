@@ -1,0 +1,22 @@
+services:
+  db:
+    container_name: weatherService-dev
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: weather_dev
+      MYSQL_USER: ogbenioye
+      MYSQL_PASSWORD: password
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - "3326:3306"
+    networks:
+      - db
+    restart: unless-stopped
+
+networks:
+  db:
+    driver: bridge
+volumes:
+  db:

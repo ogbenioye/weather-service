@@ -23,28 +23,38 @@ public class ApiKeyService {
     }
 
     public ApiResponse<ApiKey> generateNewKey(String ownerId) {
-        var user = userRepository.findById(ownerId);
-        if (user.isEmpty()) {
+        try {
+            var user = userRepository.findById(ownerId);
+            if (user.isEmpty()) {
+                return new ApiResponse<>(
+                        false,
+                        "An error occurred",
+                        HttpStatus.CONFLICT,
+                        null
+                );
+            }
+
+            var apiKey = new ApiKey(
+                    generateKey(),
+                    user.get()
+            );
+
+            apikeyRepo.save(apiKey);
+            return new ApiResponse<>(
+                    true,
+                    "Api key generated successfully",
+                    HttpStatus.CREATED,
+                    apiKey
+            );
+        }
+        catch (Exception ex) {
             return new ApiResponse<>(
                     false,
                     "An error occurred",
-                    HttpStatus.CONFLICT,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     null
             );
         }
-
-        var apiKey = new ApiKey(
-                generateKey(),
-                user.get()
-        );
-
-        apikeyRepo.save(apiKey);
-        return new ApiResponse<>(
-                true,
-                "Api key generated successfully",
-                HttpStatus.CREATED,
-                apiKey
-        );
     }
 
     private String generateKey() {
@@ -55,48 +65,68 @@ public class ApiKeyService {
     }
 
     public ApiResponse<Boolean> invalidateApikey(String apiKey) {
-        var response = apikeyRepo.findByApiKey(apiKey);
-        if (response.isEmpty()) {
+        try {
+            var response = apikeyRepo.findByApiKey(apiKey);
+            if (response.isEmpty()) {
+                return new ApiResponse<Boolean>(
+                        false,
+                        "Api key no longer exists",
+                        HttpStatus.NOT_FOUND,
+                        false
+                );
+            }
+
+            var key = response.get();
+            key.setActive(false);
+
+            apikeyRepo.save(key);
+            return new ApiResponse<Boolean>(
+                    true,
+                    "Invalidation Successful!",
+                    HttpStatus.OK,
+                    true
+            );
+        }
+        catch (Exception ex) {
             return new ApiResponse<Boolean>(
                     false,
-                    "Api key no longer exists",
-                    HttpStatus.NOT_FOUND,
+                    "An error occurred",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     false
             );
         }
-
-        var key = response.get();
-        key.setActive(false);
-
-        apikeyRepo.save(key);
-        return new ApiResponse<Boolean>(
-                true,
-                "Invalidation Successful!",
-                HttpStatus.OK,
-                true
-        );
     };
 
     public ApiResponse<Boolean> deleteKey(String apiKey) {
-        var response = apikeyRepo.findByApiKey(apiKey);
-        if (response.isEmpty()) {
+        try {
+            var response = apikeyRepo.findByApiKey(apiKey);
+            if (response.isEmpty()) {
+                return new ApiResponse<Boolean>(
+                        false,
+                        "Api key no longer exists",
+                        HttpStatus.NOT_FOUND,
+                        false
+                );
+            }
+
+            var key = response.get();
+            apikeyRepo.delete(key);
+
+            return new ApiResponse<Boolean>(
+                    true,
+                    "Delete Successful!",
+                    HttpStatus.OK,
+                    true
+            );
+        }
+        catch (Exception ex) {
             return new ApiResponse<Boolean>(
                     false,
-                    "Api key no longer exists",
-                    HttpStatus.NOT_FOUND,
+                    "An error occurred",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     false
             );
         }
-
-        var key = response.get();
-        apikeyRepo.delete(key);
-
-        return new ApiResponse<Boolean>(
-                true,
-                "Delete Successful!",
-                HttpStatus.OK,
-                true
-        );
     }
 
     public ApiResponse<ApiKey> getApiKey(String apiKey) {
@@ -119,23 +149,33 @@ public class ApiKeyService {
     }
 
     public ApiResponse<List<ApiKey>> getUserApikeys(String ownerId) {
-        var owner  = userRepository.findById(ownerId);
-        if (owner.isEmpty()) {
+        try {
+            var owner  = userRepository.findById(ownerId);
+            if (owner.isEmpty()) {
+                return new ApiResponse<List<ApiKey>>(
+                        false,
+                        "User not found",
+                        HttpStatus.NOT_FOUND,
+                        null
+                );
+            }
+
+            var keys = apikeyRepo.findAllByOwner(owner.get());
+            return new ApiResponse<List<ApiKey>>(
+                    true,
+                    String.format("Successfully retrieved %d keys", keys.size()),
+                    HttpStatus.OK,
+                    keys
+            );
+        }
+        catch (Exception ex) {
             return new ApiResponse<List<ApiKey>>(
                     false,
-                    "User not found",
-                    HttpStatus.NOT_FOUND,
+                    "An error occurred",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     null
             );
         }
-
-        var keys = apikeyRepo.findAllByOwner(owner.get());
-        return new ApiResponse<List<ApiKey>>(
-                true,
-                String.format("Successfully retrieved %d keys", keys.get().size()),
-                HttpStatus.OK,
-                keys.get()
-        );
     }
 
     public Boolean isValid(String apiKey) {

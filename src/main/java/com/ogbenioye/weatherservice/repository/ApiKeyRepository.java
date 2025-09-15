@@ -11,6 +11,5 @@ import java.util.Optional;
 @Repository
 public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
     Optional<ApiKey> findByApiKey(String apiKey);
-    Optional<List<ApiKey>> findAllByOwner(ApplicationUser owner);
-    Optional<List<ApiKey>> findAllByOwnerId(String apiKey, String owner);
+    List<ApiKey> findAllByOwner(ApplicationUser owner);
 }

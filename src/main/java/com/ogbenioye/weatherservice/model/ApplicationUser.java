@@ -27,6 +27,7 @@ public class ApplicationUser implements UserDetails {
     private String password;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApiKey> apiKeys = new ArrayList<>();
+    private String webhook;
 
     public ApplicationUser(String username, String email, String firstName, String lastName, String password) {
         this.username = username;
